@@ -1,41 +1,32 @@
-# Visual Estimathon
+# Visual Games Workspace
 
-A suite of visual estimation games inspired by angle estimation challenges.
+This repository contains two Vite/React projects:
 
-## Game Set
+- `visual-estimathon`: the original visual estimation game suite.
+- `angle-battles`: a live websocket angle guessing game.
 
-- Angles: guess the whole-number degree measure between two rays.
-- Lines: guess the shorter parallel line as a whole-number percentage of the
-  longer line.
-- Velocity: compare two horizontal ball crossings and guess the second ball's
-  speed as a whole-number percentage of the first.
-- Projectiles: compare a baseline projectile to a second projectile with the
-  same horizontal velocity and different gravity.
-- Time: watch a green circle and guess how many seconds it was visible.
-
-## Stack
-
-- Vite + React + TypeScript
-- Tailwind CSS for shared UI styling
-- Matter.js for 2D vector and physics-style calculations
-- Lucide React for interface icons
-
-## Local Development
-
-Install dependencies:
+Run either frontend from the repository root:
 
 ```sh
 npm install
+npm run dev:visual
+npm run dev:angles
 ```
 
-Run the local dev server:
+Deploy the Angle Battles websocket server to Modal:
 
 ```sh
-npm run dev
+npm run deploy:angles-server
 ```
 
-Build the static app:
+Set this environment variable for the Angle Battles frontend in Vercel:
 
-```sh
-npm run build
+```txt
+VITE_ANGLE_BATTLES_WS_URL=wss://your-modal-websocket-host
 ```
+
+The server exposes:
+
+- `GET /health`
+- `GET /rooms/{code}`
+- `WS /ws/{code}`

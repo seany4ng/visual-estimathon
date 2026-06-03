@@ -1,35 +1,18 @@
 {
-  "name": "visual-estimathon",
+  "name": "visual-games-workspace",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "version": "0.1.0",
+  "workspaces": [
+    "visual-estimathon",
+    "angle-battles"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "lucide-react": "^1.16.0",
-    "matter-js": "^0.20.0",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6"
-  },
-  "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@tailwindcss/vite": "^4.3.0",
-    "@types/matter-js": "^0.20.2",
-    "@types/node": "^24.12.3",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.2",
-    "eslint": "^10.3.0",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.2",
-    "globals": "^17.6.0",
-    "tailwindcss": "^4.3.0",
-    "typescript": "~6.0.2",
-    "typescript-eslint": "^8.59.2",
-    "vite": "^8.0.14"
+    "dev:visual": "npm --workspace visual-estimathon run dev",
+    "dev:angles": "npm --workspace angle-battles run dev",
+    "serve:angles-server": "npm --workspace angle-battles run serve:server",
+    "deploy:angles-server": "npm --workspace angle-battles run deploy:server",
+    "build": "npm --workspaces run build",
+    "build:visual": "npm --workspace visual-estimathon run build",
+    "build:angles": "npm --workspace angle-battles run build"
   }
 }
