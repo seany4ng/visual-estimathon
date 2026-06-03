@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Check,
   Copy,
-  Crosshair,
   Link,
   LogIn,
   Play,
@@ -123,47 +122,103 @@ function polarPoint(cx: number, cy: number, radius: number, degrees: number) {
   }
 }
 
+function boardRotation(roomCode: string, round: number) {
+  const codeSeed = Number(roomCode || 0)
+  return (codeSeed * 17 + round * 41) % 360
+}
+
+function BoardGrid() {
+  return (
+    <g opacity="0.72">
+      {Array.from({ length: 14 }, (_, index) => (
+        <line
+          key={`v-${index}`}
+          stroke="#dbe4ef"
+          strokeWidth="1"
+          x1={40 + index * 34}
+          x2={40 + index * 34}
+          y1="28"
+          y2="272"
+        />
+      ))}
+      {Array.from({ length: 8 }, (_, index) => (
+        <line
+          key={`h-${index}`}
+          stroke="#dbe4ef"
+          strokeWidth="1"
+          x1="40"
+          x2="480"
+          y1={34 + index * 34}
+          y2={34 + index * 34}
+        />
+      ))}
+    </g>
+  )
+}
+
 function AngleArena({
   guess,
+  roomCode = '',
+  round = 0,
   showGuess = false,
   target = 72,
 }: {
   guess: number | string
+  roomCode?: string
+  round?: number
   showGuess?: boolean
   target?: number | null
 }) {
   const normalizedTarget = Number(target ?? 72)
-  const targetEnd = polarPoint(132, 164, 112, normalizedTarget)
-  const guessEnd = polarPoint(132, 164, 96, Number(guess))
-  const arcEnd = polarPoint(132, 164, 44, normalizedTarget)
+  const startDeg = boardRotation(roomCode, round)
+  const center = { x: 260, y: 150 }
+  const radius = 82
+  const first = polarPoint(center.x, center.y, 125, startDeg)
+  const second = polarPoint(center.x, center.y, 125, startDeg + normalizedTarget)
+  const arcStart = polarPoint(center.x, center.y, radius, startDeg)
+  const arcEnd = polarPoint(center.x, center.y, radius, startDeg + normalizedTarget)
+  const guessEnd = polarPoint(center.x, center.y, 120, startDeg + Number(guess))
   const largeArc = normalizedTarget > 180 ? 1 : 0
 
   return (
-    <svg className="mx-auto block h-auto w-full max-w-xl" viewBox="0 0 264 204" role="img" aria-label="Angle battle round">
-      <defs>
-        <linearGradient id="arenaSurface" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0%" stopColor="#fff8db" />
-          <stop offset="100%" stopColor="#e7f5ff" />
-        </linearGradient>
-      </defs>
-      <rect x="10" y="10" width="244" height="184" rx="8" fill="url(#arenaSurface)" />
-      <path d="M 30 164 H 232" stroke="#17201a" strokeWidth="8" strokeLinecap="round" />
-      <path d={`M 132 164 L ${targetEnd.x} ${targetEnd.y}`} stroke="#d9480f" strokeWidth="8" strokeLinecap="round" />
-      {showGuess && (
-        <path d={`M 132 164 L ${guessEnd.x} ${guessEnd.y}`} stroke="#1864ab" strokeWidth="4" strokeLinecap="round" strokeDasharray="8 8" />
-      )}
+    <svg className="mx-auto block h-auto w-full max-w-2xl" viewBox="0 0 520 300" role="img" aria-label="Angle battle round">
+      <rect x="28" y="18" width="464" height="264" rx="10" fill="#ffffff" opacity="0.72" />
+      <BoardGrid />
       <path
-        d={`M 176 164 A 44 44 0 ${largeArc} 1 ${arcEnd.x} ${arcEnd.y}`}
-        fill="none"
-        stroke="#d9480f"
+        d={`M ${center.x} ${center.y} L ${arcStart.x} ${arcStart.y} A ${radius} ${radius} 0 ${largeArc} 1 ${arcEnd.x} ${arcEnd.y} Z`}
+        fill="rgba(245,158,11,0.18)"
+        stroke="#f59e0b"
+        strokeWidth="2"
+      />
+      <line
+        stroke="#111827"
         strokeLinecap="round"
         strokeWidth="5"
+        x1={center.x}
+        x2={first.x}
+        y1={center.y}
+        y2={first.y}
       />
-      <circle cx="132" cy="164" r="9" fill="#17201a" />
+      <line
+        stroke="#2563eb"
+        strokeLinecap="round"
+        strokeWidth="5"
+        x1={center.x}
+        x2={second.x}
+        y1={center.y}
+        y2={second.y}
+      />
       {showGuess && (
-        <text x="184" y="154" fill="#1864ab" fontSize="12" fontWeight="800">
-          guess
-        </text>
+        <line
+          stroke="#ef4444"
+          strokeLinecap="round"
+          strokeWidth="4"
+          strokeDasharray="7 8"
+          x1={center.x}
+          x2={guessEnd.x}
+          y1={center.y}
+          y2={guessEnd.y}
+        />
       )}
     </svg>
   )
@@ -220,6 +275,16 @@ function App() {
     }
 
     socketRef.current.send(JSON.stringify({ event, payload }))
+  }
+
+  function updateGuess(value: string | number) {
+    const parsed = Number(value)
+    if (!Number.isFinite(parsed)) {
+      setGuess(0)
+      return
+    }
+
+    setGuess(Math.max(0, Math.min(180, Math.round(parsed))))
   }
 
   function connectToRoom(code: string, requestedName: string) {
@@ -501,29 +566,44 @@ function App() {
                     <p className="text-sm font-black uppercase tracking-wide text-blue-700">Round {room.round}</p>
                     <h2 className="mt-1 text-2xl font-black text-slate-950">{showingResults ? 'Results are in.' : 'Guess the shared angle.'}</h2>
                   </div>
-                  <Crosshair aria-hidden="true" className="text-blue-700" size={28} />
                 </div>
 
-                <AngleArena guess={guess} showGuess={hasSubmitted || showingResults} target={target} />
+                <AngleArena
+                  guess={guess}
+                  roomCode={roomCode}
+                  round={room.round}
+                  showGuess={hasSubmitted || showingResults}
+                  target={target}
+                />
 
                 <div className="grid gap-3">
                   <label className="text-sm font-black text-slate-600" htmlFor="angle-guess">
                     Your angle
                   </label>
-                  <div className="grid gap-3 sm:grid-cols-[1fr_86px] sm:items-center">
+                  <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_150px] sm:items-center">
                     <input
                       className="accent-blue-700"
                       disabled={!roundIsLive || hasSubmitted}
                       id="angle-guess"
                       max="180"
                       min="0"
-                      onChange={(event) => setGuess(Number(event.target.value))}
+                      onChange={(event) => updateGuess(event.target.value)}
                       type="range"
                       value={guess}
                     />
-                    <output className="grid min-h-12 place-items-center rounded-md border border-slate-300 bg-white text-lg font-black text-slate-950">
-                      {guess}°
-                    </output>
+                    <div className="grid grid-cols-[minmax(86px,1fr)_44px] overflow-hidden rounded-md border border-slate-300 bg-white">
+                      <input
+                        className="min-h-12 w-full min-w-0 px-4 text-center text-lg font-black text-slate-950 outline-none [appearance:textfield]"
+                        disabled={!roundIsLive || hasSubmitted}
+                        inputMode="numeric"
+                        max={180}
+                        min={0}
+                        onChange={(event) => updateGuess(event.target.value)}
+                        type="number"
+                        value={guess}
+                      />
+                      <span className="grid min-h-12 place-items-center border-l border-slate-200 px-3 text-lg font-black text-slate-500">°</span>
+                    </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button className={primaryButtonClass} disabled={!roundIsLive || hasSubmitted} onClick={() => sendEvent('submit_guess', { guess })} type="button">
