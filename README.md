@@ -25,6 +25,9 @@ Set this environment variable for the Angle Battles frontend in Vercel:
 VITE_ANGLE_BATTLES_WS_URL=wss://your-modal-websocket-host
 ```
 
+If Vercel imports the repository root instead of `angle-battles`, the root
+`vercel.json` builds `angle-battles` and serves `angle-battles/dist`.
+
 The server exposes:
 
 - `GET /health`
