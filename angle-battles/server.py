@@ -12,7 +12,7 @@ image = modal.Image.debian_slim(python_version="3.12").pip_install(
 app = modal.App("angle-battles-server")
 
 ROOM_CODE_RE = re.compile(r"^\d{4}$")
-ROUND_TARGETS = [28, 142, 74, 113, 51, 126, 36, 157, 89, 18]
+ROUND_TARGETS = [23, 37, 52, 68, 79, 101, 117, 131, 146, 163]
 
 
 def make_message(event, **payload):

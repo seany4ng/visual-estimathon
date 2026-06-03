@@ -123,7 +123,15 @@ function polarPoint(cx: number, cy: number, radius: number, degrees: number) {
   }
 }
 
-function AngleArena({ guess, target = 72 }: { guess: number | string; target?: number | null }) {
+function AngleArena({
+  guess,
+  showGuess = false,
+  target = 72,
+}: {
+  guess: number | string
+  showGuess?: boolean
+  target?: number | null
+}) {
   const normalizedTarget = Number(target ?? 72)
   const targetEnd = polarPoint(132, 164, 112, normalizedTarget)
   const guessEnd = polarPoint(132, 164, 96, Number(guess))
@@ -141,7 +149,9 @@ function AngleArena({ guess, target = 72 }: { guess: number | string; target?: n
       <rect x="10" y="10" width="244" height="184" rx="8" fill="url(#arenaSurface)" />
       <path d="M 30 164 H 232" stroke="#17201a" strokeWidth="8" strokeLinecap="round" />
       <path d={`M 132 164 L ${targetEnd.x} ${targetEnd.y}`} stroke="#d9480f" strokeWidth="8" strokeLinecap="round" />
-      <path d={`M 132 164 L ${guessEnd.x} ${guessEnd.y}`} stroke="#1864ab" strokeWidth="4" strokeLinecap="round" strokeDasharray="8 8" />
+      {showGuess && (
+        <path d={`M 132 164 L ${guessEnd.x} ${guessEnd.y}`} stroke="#1864ab" strokeWidth="4" strokeLinecap="round" strokeDasharray="8 8" />
+      )}
       <path
         d={`M 176 164 A 44 44 0 ${largeArc} 1 ${arcEnd.x} ${arcEnd.y}`}
         fill="none"
@@ -150,9 +160,11 @@ function AngleArena({ guess, target = 72 }: { guess: number | string; target?: n
         strokeWidth="5"
       />
       <circle cx="132" cy="164" r="9" fill="#17201a" />
-      <text x="184" y="154" fill="#1864ab" fontSize="12" fontWeight="800">
-        guess
-      </text>
+      {showGuess && (
+        <text x="184" y="154" fill="#1864ab" fontSize="12" fontWeight="800">
+          guess
+        </text>
+      )}
     </svg>
   )
 }
@@ -366,7 +378,7 @@ function App() {
                 Make a room, share a code, and race to guess the angle.
               </h2>
             </div>
-            <AngleArena guess={45} target={72} />
+            <AngleArena guess={45} showGuess target={72} />
           </div>
 
           <div className={`${cardClass} grid content-start gap-5 p-5`}>
@@ -492,7 +504,7 @@ function App() {
                   <Crosshair aria-hidden="true" className="text-blue-700" size={28} />
                 </div>
 
-                <AngleArena guess={guess} target={target} />
+                <AngleArena guess={guess} showGuess={hasSubmitted || showingResults} target={target} />
 
                 <div className="grid gap-3">
                   <label className="text-sm font-black text-slate-600" htmlFor="angle-guess">
