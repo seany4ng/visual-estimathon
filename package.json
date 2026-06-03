@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "workspaces": [
-    "visual-estimathon",
+    "estimathon-suite",
     "angle-battles"
   ],
   "scripts": {

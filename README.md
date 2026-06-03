@@ -2,7 +2,7 @@
 
 This repository contains two Vite/React projects:
 
-- `visual-estimathon`: the original visual estimation game suite.
+- `estimathon-suite`: the original Visual Estimathon game suite.
 - `angle-battles`: a live websocket angle guessing game.
 
 Run either frontend from the repository root:
